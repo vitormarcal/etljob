@@ -19,5 +19,6 @@ public class AmbienteArquivoConfig {
         protected String nomeBaseArquivo;
         protected String nome;
         protected String grupo;
+        protected Boolean ativo;
     }
 }

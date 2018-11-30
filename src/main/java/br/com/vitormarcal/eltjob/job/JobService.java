@@ -15,6 +15,13 @@ import org.quartz.Job;
  */
 public interface JobService extends Job {
 
+    /**
+     * Se a propriedade ativo foi informada, pega o valor dela, se não deixa ativo por default
+     */
+    default boolean isActive() {
+        return getBaseFileConfig().getAtivo() != null ? getBaseFileConfig().getAtivo() : true;
+    }
+
     default String getJobName() {
         return getBaseFileConfig().getNome();
     }

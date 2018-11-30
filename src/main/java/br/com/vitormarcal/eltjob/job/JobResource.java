@@ -9,12 +9,10 @@ import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -42,17 +40,35 @@ public class JobResource {
         return new ResponseEntity<>(collect, HttpStatus.OK);
     }
 
+    @PostMapping
+    public ResponseEntity< Map<String, String>> executarTudo() throws SchedulerException {
+        Map<String, String> mensagens = new HashMap<>();
+        for (JobKey jobKey : scheduler.getJobKeys(GroupMatcher.anyGroup())) {
+            if (jobEmExecucao(jobKey)) {
+                mensagens.put(getName(jobKey), "Job já está em execução");
+            } else {
+                mensagens.put(getName(jobKey), "Job iniciado");
+                scheduler.triggerJob(jobKey);
+            }
+        }
+        return new ResponseEntity<>(mensagens, HttpStatus.OK);
+    }
+
     private String getLinkJob(JobKey job) {
         String uri;
         String url = request.getRequestURL().toString();
         url = url.endsWith("/") ? url : url + "/";
-        if (job.getName().equals(job.getGroup())) {
-            uri = job.getName();
-        } else {
-            uri = job.getGroup() + "/" + job.getName();
-        }
+        uri = getName(job);
 
         return url + uri;
+    }
+
+    private String getName(JobKey job) {
+        if (job.getName().equals(job.getGroup())) {
+            return job.getName();
+        } else {
+            return job.getGroup() + "/" + job.getName();
+        }
     }
 
 
