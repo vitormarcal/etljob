@@ -35,6 +35,7 @@ public class JobTrigger {
     @Bean
     public Scheduler scheduler() throws SchedulerException {
         List<Detail> details = jobs.stream()
+                .filter(JobService::isActive)
                 .map(this::createJob)
                 .collect(Collectors.toList());
 
